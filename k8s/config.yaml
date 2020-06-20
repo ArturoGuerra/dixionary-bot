@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+    name: dixionarybot
+data:
+    TOKEN: "Discord Bot Token"
+    CHANNEL: "Discord channel ID"

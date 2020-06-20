@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: dixionarybot
+    labels:
+        app: dixionarybot
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: dixionarybot
+    template:
+        metadata:
+            labels:
+                app: dixionarybot
+        spec:
+            containers:
+              - name: dixionarybot
+                image: arturoguerra/dixionarybot:latest
+                envFrom:
+                    - configMapRef:
+                        name: dixionarybot
+                  
