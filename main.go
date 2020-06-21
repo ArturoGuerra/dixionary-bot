@@ -13,34 +13,38 @@ import (
 )
 
 var (
-	token     string = os.Getenv("TOKEN")
-	channelID string = os.Getenv("CHANNEL")
-	dixionary map[string]string
+	token     string            = os.Getenv("TOKEN")
+	channelID string            = os.Getenv("CHANNEL")
+	dixionary map[string]string = make(map[string]string)
 )
 
 func init() {
 	byteFile, _ := ioutil.ReadFile("./dixionary.json")
 
-	if err := json.Unmarshal(byteFile, &dixionary); err != nil {
+	rawDixionary := make(map[string]string)
+
+	if err := json.Unmarshal(byteFile, &rawDixionary); err != nil {
 		fmt.Printf("Error: %v\n", err)
 		return
+	}
+
+	for englishWord, newWord := range rawDixionary {
+		dixionary[strings.ToLower(englishWord)] = newWord
 	}
 }
 
 func dixionaryGen(message string) string {
-	var msg []string
-
 	split := strings.Split(message, " ")
+
+	msg := make([]string, 0, len(split))
+
 	for _, word := range split {
-		newWord := word
-		for englishWord, scamWord := range dixionary {
-			if strings.ToLower(englishWord) == strings.ToLower(word) {
-				newWord = scamWord
-				break
-			}
+		if newWord, ok := dixionary[strings.ToLower(word)]; ok {
+			msg = append(msg, newWord)
+			continue
 		}
 
-		msg = append(msg, newWord)
+		msg = append(msg, word)
 	}
 
 	return strings.Join(msg, " ")
@@ -51,7 +55,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	if m.ChannelID == channelID {
+	if m.ChannelID == channelID && len(m.Content) > 0 {
 		s.ChannelMessageSend(channelID, dixionaryGen(m.Content))
 	}
 }
